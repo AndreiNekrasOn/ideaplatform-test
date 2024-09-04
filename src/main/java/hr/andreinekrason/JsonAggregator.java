@@ -33,7 +33,7 @@ public class JsonAggregator {
         }
 
         double meanMedianPriceDiff = getMeanMedianPriceDiff(filteredTickets);
-        System.out.printf("Mean and avarage price difference: %f\n",
+        System.out.printf("Mean and median price difference: %f\n",
                 meanMedianPriceDiff);
     }
 
@@ -50,15 +50,21 @@ public class JsonAggregator {
     }
 
     public static double getMeanMedianPriceDiff(List<Ticket> tickets) {
+        if (tickets.size() == 0) {
+            throw new IllegalStateException("Tickets size < 0");
+        } else if (tickets.size() == 1) {
+            return 0;
+        }
         double mean = tickets.stream()
-            .mapToInt(Ticket::getPrice)
+            .mapToDouble(Ticket::getPrice)
             .average()
             .orElseGet(() -> 0);
         double median = tickets.stream()
             .mapToInt(Ticket::getPrice)
             .sorted()
-            .skip(tickets.size() / 2)
-            .findFirst()
+            .skip(tickets.size() / 2 - 1)
+            .limit(tickets.size() % 2 == 0 ? 2 : 1)
+            .average()
             .orElseGet(() -> 0);
         return mean - median;
     }
